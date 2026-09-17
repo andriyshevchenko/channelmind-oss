@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Channelmind{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="h-full antialiased">
+  <div class="min-h-full">
+    <header class="cm-header">
+      <div class="cm-header-inner">
+        <div class="cm-brand">
+          <a href="/" class="cm-logo" aria-label="Channelmind home">
+            <span class="cm-logo-mark">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><rect x="4" y="6" width="16" height="12" rx="3"></rect><circle cx="9" cy="12" r="1" fill="#fff" stroke="none"></circle><circle cx="15" cy="12" r="1" fill="#fff" stroke="none"></circle></svg>
+            </span>
+            <span class="cm-wordmark">Channelmind</span>
+          </a>
+          {% block header_label %}{% endblock %}
+        </div>
+        <nav class="cm-nav">
+          <a href="/" class="nav-link">My Bots</a>
+          <a href="/settings" class="nav-link">Settings</a>
+          {% if user %}
+          <div class="cm-userchip" id="cm-userchip">
+            <button type="button" class="cm-userchip-btn" onclick="cmToggleMenu(event)">
+              <span class="cm-userchip-meta">
+                <span class="cm-userchip-name">{{ user.name or user.email }}</span>
+                {% if user.name and user.email %}<span class="cm-userchip-email">{{ user.email }}</span>{% endif %}
+              </span>
+              <span class="cm-avatar">{{ (user.name or user.email or "?")[0] | upper }}</span>
+            </button>
+            <div class="cm-menu" id="cm-menu" hidden>
+              <a href="/account" class="cm-menu-item">Account</a>
+              <a href="/logout" class="cm-menu-item cm-menu-danger">Log out</a>
+            </div>
+          </div>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+    <main class="cm-main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script>
+    function cmToggleMenu(e){e.stopPropagation();var m=document.getElementById('cm-menu');if(m){m.hidden=!m.hidden;}}
+    document.addEventListener('click',function(){var m=document.getElementById('cm-menu');if(m){m.hidden=true;}});
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

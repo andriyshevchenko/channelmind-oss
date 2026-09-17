@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Channelmind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #0a0a0e; font-family: 'Instrument Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: #e5e5ea; }
+  a { color: #a5b4fc; text-decoration: none; }
+  a:hover { color: #c7d2fe; }
+  .cm-nav-inactive { color: #8a8a99; }
+  .cm-nav-inactive:hover { color: #e5e5ea; }
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: #0a0a0e; color: #e5e5ea;">
+  <header style="border-bottom: 1px solid #1e1e28;">
+    <div style="max-width: 720px; margin: 0 auto; box-sizing: border-box; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between;">
+      <a href="/about" style="display: flex; align-items: center; gap: 10px; color: #e5e5ea;">
+        <div style="width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(135deg, #f43f5e, #6366f1); display: flex; align-items: center; justify-content: center;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><rect x="4" y="6" width="16" height="12" rx="3"></rect><circle cx="9" cy="12" r="1" fill="#fff" stroke="none"></circle><circle cx="15" cy="12" r="1" fill="#fff" stroke="none"></circle></svg>
+        </div>
+        <span style="font-size: 14px; font-weight: 700;">Channelmind</span>
+      </a>
+      <div style="display: flex; gap: 16px; font-size: 12.5px;">
+        <a href="/terms" class="cm-nav-inactive">Terms</a>
+        <a href="/privacy" style="color: #e5e5ea; font-weight: 600;">Privacy</a>
+      </div>
+    </div>
+  </header>
+  <main style="max-width: 720px; margin: 0 auto; box-sizing: border-box; padding: 48px 32px 96px;">
+    <h1 style="margin: 0 0 6px; font-size: 28px; font-weight: 700; letter-spacing: -.01em;">Privacy Policy</h1>
+    <p style="margin: 0 0 36px; font-size: 12.5px; color: #5a5a6a;">Effective [EFFECTIVE_DATE]</p>
+    <div style="display: flex; flex-direction: column; gap: 28px; font-size: 14px; line-height: 1.7; color: #b8b8c6;">
+      <section>
+        <p style="margin: 0;">This policy explains how [COMPANY_LEGAL_NAME] ("we", "us") handles personal data in Channelmind. The data controller is [COMPANY_LEGAL_NAME], contactable at <a href="mailto:[CONTACT_EMAIL]">[CONTACT_EMAIL]</a>.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">1. What we collect</h2>
+        <p style="margin: 0;">Your Google account name and email (for sign-in); the channels and documents you add and the transcripts fetched for them; the personas you generate; chat messages sent to your bots (yours and those of people you share a link with); and basic usage metrics (token counts and spend) used to run the service and enforce limits. We also keep a narrow audit record of legally-significant actions — such as your rights attestation when you add a source, and share-link and takedown actions — not your browsing or individual chats.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">2. How and why we use it</h2>
+        <p style="margin: 0;">We use this data to build and serve your bots: transcripts and documents are split into passages, indexed as vectors, and stored in a private index scoped to your account, and chat messages are sent to the model provider to generate grounded answers. The lawful bases are performance of our agreement with you (running the service you asked for) and our legitimate interests in operating, securing, and supporting it. We do not sell your data or use your content to train models.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">3. Private sharing</h2>
+        <p style="margin: 0;">Sharing is private only. A bot is reachable through an unguessable link you create and can revoke, or through your own Telegram bot — there are no openly reachable bot pages. Anyone with a live link can chat with that bot on your account's usage, so share links only with people you trust. Messages that guests send are processed to answer them and are associated with the bot, not with a guest identity.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">4. Third-party processors</h2>
+        <p style="margin: 0;">To run the service we rely on providers acting on our behalf: a hosting provider for the server; model providers that generate answers and build the search index; and Telegram where you connect a bot. Transcripts are fetched from YouTube using third-party tooling; that dependency means new ingestion may be interrupted or unavailable at times, though content already ingested is unaffected. We share only what each provider needs to perform its function.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">5. API keys (BYOK)</h2>
+        <p style="margin: 0;">If you bring your own provider keys, they are treated as secrets: stored with restricted access, masked in the interface, used only to call the providers you selected, never shown back in full, and never written to logs. You can replace or clear a key at any time.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">6. Retention</h2>
+        <p style="margin: 0;">We keep account data, bots, sources, transcripts, and usage records for as long as your account is active. When you remove a source or bot, its index and stored transcripts are deleted. You can delete your account and all its data yourself at any time from the Account page — this removes your bots, their sources and transcripts, derived indexes, and usage records. A minimal audit record that an action occurred may be retained where we need it to evidence compliance, without retaining the deleted content itself.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">7. Your rights</h2>
+        <p style="margin: 0;">Subject to applicable law you may request access to, correction of, a copy of, or erasure of your personal data, and may object to or restrict certain processing. Erasure is available self-serve from your Account page; for access, correction, or a copy, contact <a href="mailto:[CONTACT_EMAIL]">[CONTACT_EMAIL]</a> and we will respond within the time the law requires. You may also complain to your local data protection authority.</p>
+      </section>
+      <section>
+        <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #e5e5ea;">8. Deletion, takedowns &amp; contact</h2>
+        <p style="margin: 0;">Deleting a bot or source permanently removes its associated indexes; to delete your whole account and all its data, use the delete option on your Account page. Rights holders can request removal of a channel via <a href="mailto:[CONTACT_EMAIL]">[CONTACT_EMAIL]</a>; we purge the affected source, its transcripts, and its vector chunks across accounts on a valid notice. For any privacy question, contact <a href="mailto:[CONTACT_EMAIL]">[CONTACT_EMAIL]</a>.</p>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

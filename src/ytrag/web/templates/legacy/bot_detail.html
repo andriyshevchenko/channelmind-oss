@@ -1,0 +1,914 @@
+{% extends "legacy/base.html" %}
+{% block title %}{{ bot_id }} · Channelmind{% endblock %}
+{% block header_label %}<span class="cm-header-sep">/</span><span class="cm-header-label">Bot Detail</span>{% endblock %}
+{% block content %}
+<div data-bot-id="{{ bot_id }}">
+  <style>
+    .cm-back{font-size:13px; color:var(--muted); display:inline-flex; align-items:center; gap:6px; text-decoration:none;}
+    .cm-back:hover{color:var(--text);}
+    .cm-nameinput{height:40px; box-sizing:border-box; padding:0 12px; border-radius:8px; border:1px solid transparent; background:transparent; color:var(--text); font-family:inherit; font-size:20px; font-weight:700; letter-spacing:-.01em; outline:none; width:320px; max-width:100%;}
+    .cm-nameinput:hover{border-color:#2c2c3a; background:var(--tile);}
+    .cm-nameinput:focus{border-color:var(--accent-to); background:var(--tile);}
+    .cm-cardtitle{font-size:15px; font-weight:700; color:var(--text-strong);}
+    .cm-cardeyebrow{font-size:12px; color:var(--faint);}
+    .cm-fieldlabel{font-size:12.5px; font-weight:600; color:#b8b8c6;}
+    .cm-sectlabel{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--faint);}
+    details.cm-collapse{border-radius:8px; border:1px solid var(--card-border); background:var(--tile); overflow:hidden;}
+    details.cm-collapse>summary{list-style:none; cursor:pointer;}
+    details.cm-collapse>summary::-webkit-details-marker{display:none;}
+    details.cm-collapse[open] .cm-chev{transform:rotate(180deg);}
+    .cm-chev{transition:transform .2s;}
+    .cm-summary{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; font-size:13px; font-weight:600; color:var(--text);}
+    .cm-summary:hover{background:#14141c;}
+    .cm-faint{color:var(--faint);}
+    .cm-muted{color:var(--muted);}
+    .cm-text{color:var(--text);}
+    .cm-rose{color:#f87171;}
+    .cm-link{color:var(--accent-soft); text-decoration:underline;}
+    .cm-link:hover{color:var(--text-strong);}
+    .cm-row{border:1px solid var(--tile-border); background:var(--tile);}
+    .cm-toast{border:1px solid var(--card-border); background:var(--tile);}
+    .cm-toast-error{border-color:rgba(248,113,113,.35);}
+    .cm-consent{display:flex; align-items:flex-start; gap:9px; font-size:12.5px; color:#b8b8c6; line-height:1.45; cursor:pointer; user-select:none;}
+    .cm-consent input{margin-top:1px; accent-color:#6366f1; width:15px; height:15px; flex-shrink:0;}
+    .cm-tgcode{font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--bg); padding:1px 6px; border-radius:5px; border:1px solid var(--card-border);}
+  </style>
+
+  <!-- HEADER -->
+  <a href="/" class="cm-back">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+    My Bots
+  </a>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin:14px 0 24px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+      <input id="botName" class="cm-nameinput" placeholder="Bot name" />
+      <button id="saveName" class="btn-ghost">Rename</button>
+      <span id="nameStatus" style="font-size:12px; color:var(--muted);"></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div id="headerBadges" style="display:flex; align-items:center; gap:8px;"></div>
+      <button id="shareBtn" type="button" class="btn-secondary" style="height:36px; padding:0 14px; font-size:13px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"></path></svg>
+        Share
+      </button>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(480px,1fr)); gap:16px;">
+
+    <!-- PERSONA -->
+    <div class="card" style="display:flex; flex-direction:column; gap:16px;">
+      <div style="display:flex; align-items:baseline; gap:8px;">
+        <span class="cm-cardtitle">Persona</span><span class="cm-cardeyebrow">Identity</span>
+      </div>
+      <label style="display:flex; flex-direction:column; gap:6px;">
+        <span class="cm-fieldlabel">Description (what this bot is about)</span>
+        <textarea id="description" class="field" rows="3" style="resize:none;" placeholder="Describe the bot in plain words — who it is, its tone, and the language it speaks."></textarea>
+      </label>
+      <div id="interview" class="hidden" style="border-radius:8px; border:1px solid var(--tile-border); background:var(--tile); padding:14px;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <span class="cm-sectlabel">A few clarifying questions</span>
+          <p id="interviewQ" style="font-size:13px; line-height:1.5; color:var(--text); margin:0;"></p>
+          <div style="display:flex; gap:8px;">
+            <input id="interviewA" class="field" style="flex:1;" placeholder="Your answer…" />
+            <button id="interviewSend" class="btn">Answer</button>
+          </div>
+          <span id="interviewStatus" style="font-size:11.5px; color:var(--faint);"></span>
+        </div>
+      </div>
+      <label style="display:flex; flex-direction:column; gap:6px;">
+        <span class="cm-fieldlabel">Language (bot replies &amp; status messages)</span>
+        <input id="language" class="field" placeholder="Ukrainian" />
+      </label>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="buildPersona" class="btn">Generate persona</button>
+        <span id="genStatus" style="font-size:12px; color:var(--muted);"></span>
+      </div>
+      <label style="display:flex; flex-direction:column; gap:6px;">
+        <span class="cm-fieldlabel">Generated persona <span style="font-weight:500; color:var(--faint);">read-only</span></span>
+        <textarea id="persona" class="field mono" readonly rows="8" style="font-size:12px; line-height:1.6; color:#b8b8c6; background:var(--bg); max-height:220px; resize:vertical;" placeholder="Generated persona appears here…"></textarea>
+      </label>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="savePersona" class="btn-secondary">Save</button>
+        <span id="personaStatus" style="font-size:12px; color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <!-- SOURCES -->
+    <div class="card" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:baseline; gap:8px;"><span class="cm-cardtitle">Sources</span><span class="cm-cardeyebrow">Knowledge</span></div>
+        <button id="rebuild" class="btn-ghost">Rebuild index</button>
+      </div>
+      <div id="sourcesList" style="display:flex; flex-direction:column; gap:8px;">
+        <p style="font-size:13px; color:var(--muted);">Loading…</p>
+      </div>
+
+      <!-- Add YouTube -->
+      <details class="cm-collapse">
+        <summary class="cm-summary">
+          <span style="display:flex; align-items:center; gap:9px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#f87171"><path d="M23 7.5s-.2-1.7-.9-2.4c-.9-1-1.9-1-2.4-1C16.4 3.8 12 3.8 12 3.8s-4.4 0-7.7.3c-.5.1-1.5.1-2.4 1-.7.7-.9 2.4-.9 2.4S.8 9.4.8 11.4v1.8c0 1.9.2 3.9.2 3.9s.2 1.7.9 2.4c.9 1 2 .9 2.5 1 1.8.2 7.6.3 7.6.3s4.4 0 7.7-.3c.5-.1 1.5-.1 2.4-1 .7-.7.9-2.4.9-2.4s.2-1.9.2-3.9v-1.8c0-1.9-.2-3.9-.2-3.9zM9.8 15.3V8.7l6.2 3.3-6.2 3.3z"></path></svg>
+            Add YouTube channel
+          </span>
+          <svg class="cm-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8a8a99" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </summary>
+        <div style="padding:0 14px 14px; display:flex; flex-direction:column; gap:10px;">
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span class="cm-fieldlabel">Channel URL or @handle <span style="color:var(--accent-from);">*</span></span>
+            <input id="yt_channel" class="field" placeholder="https://youtube.com/@Igor" />
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span class="cm-fieldlabel">Author <span style="color:var(--accent-from);">*</span></span>
+            <input id="yt_author" class="field" placeholder="Ігор" />
+          </label>
+          <label class="cm-consent">
+            <input type="checkbox" id="yt_consent" />
+            <span>I own this channel or have the rights to use its content <span style="color:var(--accent-from);">*</span></span>
+          </label>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button id="addYt" class="btn" disabled>Add channel</button>
+            <span id="ytStatus" style="font-size:12px; color:var(--muted);"></span>
+          </div>
+        </div>
+      </details>
+
+      <!-- Add document -->
+      <details class="cm-collapse">
+        <summary class="cm-summary">
+          <span style="display:flex; align-items:center; gap:9px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+            Add document
+          </span>
+          <svg class="cm-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8a8a99" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </summary>
+        <div style="padding:0 14px 14px; display:flex; flex-direction:column; gap:10px;">
+          <p style="font-size:11.5px; color:var(--faint); margin:0;">Supported: txt, md, pdf, docx.</p>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span class="cm-fieldlabel">File</span>
+            <input id="doc_file" class="field" type="file" accept=".txt,.md,.pdf,.docx" style="padding:8px 12px; height:auto;" />
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span class="cm-fieldlabel">Author <span style="color:var(--accent-from);">*</span></span>
+            <input id="doc_author" class="field" placeholder="Ігор" />
+          </label>
+          <label class="cm-consent">
+            <input type="checkbox" id="doc_consent" />
+            <span>I own this document or have the rights to use its content <span style="color:var(--accent-from);">*</span></span>
+          </label>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button id="addDoc" class="btn" disabled>Upload &amp; index</button>
+            <span id="docStatus" style="font-size:12px; color:var(--muted);"></span>
+          </div>
+        </div>
+      </details>
+
+      <!-- Ingestion queue -->
+      <div id="queuePanel" class="hidden">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <span class="cm-sectlabel">Ingestion queue</span>
+          <div id="queueList" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Shared job progress -->
+      <div id="jobCard" class="hidden" style="border-radius:8px; border:1px solid var(--tile-border); background:var(--tile); padding:14px;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-size:12.5px; font-weight:600; color:#60a5fa;">Progress <span id="jobStage" style="color:var(--faint); font-weight:400;"></span></div>
+            <div id="jobCounts" style="font-size:11.5px; color:var(--faint); font-family:'JetBrains Mono',monospace;"></div>
+          </div>
+          <div style="height:5px; border-radius:9999px; background:#22222c; overflow:hidden;">
+            <div id="jobBar" style="height:100%; border-radius:9999px; background:linear-gradient(90deg,#f43f5e,#6366f1); width:0%"></div>
+          </div>
+          <div id="jobLog" class="log" style="height:auto; max-height:84px; font-size:10.5px; line-height:1.7; color:var(--faint); background:var(--bg);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="card" style="display:flex; flex-direction:column; gap:14px; min-height:420px;">
+      <div style="display:flex; align-items:baseline; gap:8px;"><span class="cm-cardtitle">Chat</span><span class="cm-cardeyebrow">Try it</span></div>
+      <div id="messages" style="flex:1 1 auto; display:flex; flex-direction:column; gap:12px; overflow-y:auto; min-height:16rem; max-height:28rem; padding-right:4px;">
+        <div id="chatEmpty" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; padding:32px 20px;">
+          <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,rgba(244,63,94,.15),rgba(99,102,241,.15)); border:1px solid #26262f; display:flex; align-items:center; justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          <span style="font-size:13px; color:var(--muted); max-width:260px; line-height:1.5;">Ask this bot something to see grounded answers with sources.</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <input id="chatInput" class="field" style="flex:1;" placeholder="Ask this bot something…" />
+        <button id="chatSend" class="btn">Send</button>
+      </div>
+    </div>
+
+    <!-- TELEGRAM -->
+    <div class="card" style="display:flex; flex-direction:column; gap:16px;">
+      <div style="display:flex; align-items:baseline; gap:8px;"><span class="cm-cardtitle">Telegram</span><span class="cm-cardeyebrow">Deploy</span></div>
+      <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">Give this bot its own Telegram bot so people can chat with it directly.</p>
+      <div id="tgConnected" class="hidden">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px; border-radius:8px; border:1px solid rgba(52,211,153,.25); background:rgba(52,211,153,.06);">
+          <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+            <span style="width:8px; height:8px; border-radius:9999px; background:#34d399; flex-shrink:0;"></span>
+            <span style="font-size:13.5px; font-weight:600; color:#34d399;">Connected as <span id="tgUsername" style="font-family:'JetBrains Mono',monospace;"></span></span>
+          </div>
+          <button id="tgDisconnect" class="btn-danger">Disconnect</button>
+        </div>
+      </div>
+      <div id="tgSetup">
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <ol style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;">
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.5; color:#b8b8c6;"><span style="width:20px; height:20px; flex-shrink:0; border-radius:9999px; background:#1a1a24; border:1px solid #2c2c3a; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--muted);">1</span><span>Open <a class="cm-link" href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> in Telegram.</span></li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.5; color:#b8b8c6;"><span style="width:20px; height:20px; flex-shrink:0; border-radius:9999px; background:#1a1a24; border:1px solid #2c2c3a; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--muted);">2</span><span>Send <code class="cm-tgcode">/newbot</code> and choose a name and a username.</span></li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.5; color:#b8b8c6;"><span style="width:20px; height:20px; flex-shrink:0; border-radius:9999px; background:#1a1a24; border:1px solid #2c2c3a; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--muted);">3</span><span>Copy the API token BotFather gives you.</span></li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.5; color:#b8b8c6;"><span style="width:20px; height:20px; flex-shrink:0; border-radius:9999px; background:#1a1a24; border:1px solid #2c2c3a; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--muted);">4</span><span>Paste it below and click Connect.</span></li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.5; color:#b8b8c6;"><span style="width:20px; height:20px; flex-shrink:0; border-radius:9999px; background:#1a1a24; border:1px solid #2c2c3a; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--muted);">5</span><span>Open your new bot in Telegram and start chatting.</span></li>
+          </ol>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span class="cm-fieldlabel">Bot API token</span>
+            <input id="tgToken" class="field mono" type="password" style="font-size:12px;" placeholder="123456789:AA…" />
+          </label>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button id="tgConnect" class="btn">Connect</button>
+            <span id="tgStatus" style="font-size:12px; color:var(--muted);"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+<!-- Share modal (private link) -->
+<div id="shareModal" hidden style="position:fixed; inset:0; z-index:50; background:rgba(5,5,8,.7); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:24px;">
+  <div class="card" style="width:100%; max-width:440px; box-shadow:0 24px 64px rgba(0,0,0,.6); padding:24px; display:flex; flex-direction:column; gap:14px;" onclick="event.stopPropagation()">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:3px;">
+        <span style="font-size:16px; font-weight:700; color:var(--text-strong);">Share this bot</span>
+        <span style="font-size:12.5px; color:var(--muted);">A private link — no account needed to chat.</span>
+      </div>
+      <button id="shareClose" type="button" class="btn-ghost" style="padding:4px 8px;">✕</button>
+    </div>
+
+    <!-- No active link -->
+    <div id="shareOff" class="hidden" style="display:flex; flex-direction:column; gap:12px;">
+      <p style="font-size:13px; color:var(--muted); line-height:1.55; margin:0;">
+        Create a private link so a few people you trust can chat with this bot. It runs on
+        <strong>your</strong> quota, so keep the circle small.
+      </p>
+      <button id="shareGenerate" class="btn">Create private link</button>
+    </div>
+
+    <!-- Active link -->
+    <div id="shareOn" class="hidden" style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; gap:8px;">
+        <input id="shareUrl" class="field mono" readonly style="flex:1; font-size:12px;" />
+        <button id="shareCopy" class="btn-secondary" style="white-space:nowrap;">Copy</button>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:8px; background:var(--tile); border:1px solid var(--tile-border);">
+        <span style="font-size:12px; color:var(--faint);">Guest messages today</span>
+        <span id="shareCount" class="mono" style="font-size:13px; color:var(--text);">— / —</span>
+      </div>
+      <p style="font-size:12px; color:#fbbf24; background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.2); border-radius:8px; padding:9px 11px; margin:0; line-height:1.5;">
+        Anyone with this link can chat with this bot on your quota — share only with people you trust.
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button id="shareRotate" class="btn-secondary" style="flex:1;">Rotate link</button>
+        <button id="shareRevoke" class="btn-danger" style="flex:1;">Revoke</button>
+      </div>
+      <span style="font-size:11px; color:var(--faint); line-height:1.5;">Rotating makes a new link and instantly disables the old one. Revoking turns sharing off entirely.</span>
+    </div>
+
+    <span id="shareStatus" style="font-size:12px; color:var(--muted); min-height:14px;"></span>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const BOT_ID = document.querySelector("[data-bot-id]").dataset.botId;
+const API = `/api/bots/${encodeURIComponent(BOT_ID)}`;
+const history = [];
+let poll = null;
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, (c) => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]
+  ));
+}
+
+// Only http(s) urls become active links — a javascript:/data: scheme is
+// rendered as plain text so a poisoned source url can't run.
+function safeUrl(u) {
+  u = (u || "").trim();
+  return /^https?:\/\//i.test(u) ? u : "";
+}
+
+function badge(status) {
+  const s = (status || "").toLowerCase();
+  const cls = {pending:"badge-pending", building:"badge-building", ready:"badge-ready", error:"badge-error"}[s] || "badge-neutral";
+  return `<span class="badge ${cls}">${escapeHtml(status || "—")}</span>`;
+}
+
+// Tiny, safe markdown renderer (headings, bold, code, links, lists, paragraphs).
+function renderMarkdown(src) {
+  let s = escapeHtml(src || "");
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  const lines = s.split(/\r?\n/);
+  let html = "", list = null;
+  const closeList = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) { closeList(); continue; }
+    let m;
+    if ((m = t.match(/^(#{1,3})\s+(.*)$/))) { closeList(); const n = m[1].length; html += `<h${n}>${m[2]}</h${n}>`; }
+    else if ((m = t.match(/^[-*]\s+(.*)$/))) { if (list !== "ul") { closeList(); list = "ul"; html += "<ul>"; } html += `<li>${m[1]}</li>`; }
+    else if ((m = t.match(/^\d+\.\s+(.*)$/))) { if (list !== "ol") { closeList(); list = "ol"; html += "<ol>"; } html += `<li>${m[1]}</li>`; }
+    else { closeList(); html += `<p>${t}</p>`; }
+  }
+  closeList();
+  return html;
+}
+
+/* ---------- Bot detail ---------- */
+let currentBot = null;
+
+async function loadBot() {
+  try {
+    const r = await fetch(API);
+    const data = await r.json();
+    if (data.error) { $("nameStatus").textContent = data.error; return; }
+    const b = data.bot || {};
+    currentBot = b;
+    document.title = `${b.name || "Bot"} · Channelmind`;
+    $("botName").value = b.name || "";
+    $("description").value = b.description || "";
+    $("language").value = b.language || "";
+    $("persona").value = b.persona || "";
+    $("headerBadges").innerHTML =
+      (b.status ? badge(b.status) : "") +
+      (b.chunk_count != null ? ` <span class="badge badge-neutral">${b.chunk_count} chunks</span>` : "");
+    renderSources(b.sources || []);
+    renderTelegram(b.telegram_username);
+    // Keep the attestation gates authoritative after any reload — a finished
+    // ingest re-enables the Add buttons, so re-apply the checkbox state.
+    syncYtConsent();
+    syncDocConsent();
+  } catch (e) {
+    $("nameStatus").textContent = "Failed to load: " + e;
+    $("sourcesList").innerHTML = `<p class="text-sm cm-rose">Failed to load this bot: ${escapeHtml(String(e))}</p>`;
+  }
+}
+
+function renderSources(sources) {
+  if (!sources.length) {
+    $("sourcesList").innerHTML = '<p class="text-sm cm-faint">No sources yet — add a channel or document below.</p>';
+    return;
+  }
+  $("sourcesList").innerHTML = sources.map((s) => {
+    const icon = s.type === "youtube" ? "▶" : "▧";
+    const kind = s.type === "youtube" ? "YouTube" : "Document";
+    const isYt = s.type === "youtube";
+    const hasAvatar = isYt && typeof s.channel_avatar === "string" && s.channel_avatar;
+    const iconEl = `<span class="cm-faint mr-1">${icon}</span>`;
+    const avatarEl = hasAvatar
+      ? `<img src="${escapeHtml(s.channel_avatar)}" alt="" referrerpolicy="no-referrer"
+              class="h-10 w-10 rounded-full object-cover shrink-0"
+              onerror="this.nextElementSibling && this.nextElementSibling.classList.remove('hidden'); this.remove();" />
+         <span class="cm-faint mr-1 hidden">${icon}</span>`
+      : iconEl;
+    const channelLine = (isYt && s.channel_title)
+      ? `<div class="text-xs cm-faint truncate">${escapeHtml(s.channel_title)}</div>`
+      : "";
+    return `
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg cm-row px-4 py-3">
+        <div class="flex items-center gap-3 min-w-0">
+          ${hasAvatar ? avatarEl : ""}
+          <div class="min-w-0">
+            <div class="font-medium truncate">
+              ${hasAvatar ? "" : iconEl}${escapeHtml(s.label)}
+              <span class="text-xs cm-faint">(${kind})</span>
+            </div>
+            ${channelLine}
+            <div class="text-xs cm-faint mt-0.5">
+              author: <span class="cm-muted">${escapeHtml(s.author || "—")}</span>
+              · ${s.item_count ?? 0} items · ${s.chunk_count ?? 0} chunks
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+          ${badge(s.status)}
+          ${(isYt && !activeSourceIds.has(s.id) && s.status !== "building")
+            ? `<button data-id="${escapeHtml(s.id)}" class="startImport btn text-xs">Start import</button>`
+            : ""}
+          <button data-id="${escapeHtml(s.id)}" class="delSrc btn-danger">Delete</button>
+        </div>
+      </div>`;
+  }).join("");
+  document.querySelectorAll(".delSrc").forEach((b) =>
+    b.addEventListener("click", () => delSource(b.dataset.id))
+  );
+  document.querySelectorAll(".startImport").forEach((b) =>
+    b.addEventListener("click", () => startImport(b.dataset.id, b))
+  );
+}
+
+function renderTelegram(username) {
+  if (username) {
+    $("tgConnected").classList.remove("hidden");
+    $("tgSetup").classList.add("hidden");
+    $("tgUsername").textContent = "@" + username;
+  } else {
+    $("tgConnected").classList.add("hidden");
+    $("tgSetup").classList.remove("hidden");
+  }
+}
+
+/* ---------- Header rename ---------- */
+async function saveName() {
+  const name = $("botName").value.trim();
+  if (!name) { $("nameStatus").textContent = "Name can't be empty."; return; }
+  $("saveName").disabled = true; $("nameStatus").textContent = "Saving…";
+  const ok = await patchBot({name});
+  $("nameStatus").textContent = ok ? "Saved." : "Error.";
+  $("saveName").disabled = false;
+}
+
+/* ---------- Persona ---------- */
+let interviewAnswers = [];
+let interviewQuestion = "";
+
+function startInterview() {
+  const description = $("description").value.trim();
+  if (!description) { $("interviewStatus").textContent = "Add a description first."; $("interview").classList.remove("hidden"); return; }
+  interviewAnswers = [];
+  $("interview").classList.remove("hidden");
+  runInterview();
+}
+
+async function runInterview() {
+  $("interviewSend").disabled = true; $("interviewStatus").textContent = "Thinking…";
+  try {
+    const r = await fetch(`${API}/persona/interview`, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({description: $("description").value.trim(), answers: interviewAnswers}),
+    });
+    const data = await r.json();
+    if (data.error) { $("interviewStatus").textContent = data.error; }
+    else if (data.done) {
+      $("persona").value = data.persona || "";
+      $("interview").classList.add("hidden");
+      $("genStatus").textContent = "Done — review and save.";
+      $("interviewStatus").textContent = "";
+      interviewAnswers = [];
+    } else {
+      interviewQuestion = data.question;
+      $("interviewQ").textContent = data.question || "";
+      $("interviewA").value = "";
+      $("interviewStatus").textContent = "";
+      $("interviewA").focus();
+    }
+  } catch (e) { $("interviewStatus").textContent = "Request failed: " + e; }
+  $("interviewSend").disabled = false;
+}
+
+function sendInterviewAnswer() {
+  const answer = $("interviewA").value.trim();
+  if (!answer) return;
+  interviewAnswers.push({question: interviewQuestion, answer});
+  runInterview();
+}
+
+async function savePersona() {
+  $("savePersona").disabled = true; $("personaStatus").textContent = "Saving…";
+  const ok = await patchBot({persona: $("persona").value, description: $("description").value, language: $("language").value.trim()});
+  $("personaStatus").textContent = ok ? "Saved." : "Error.";
+  $("savePersona").disabled = false;
+}
+
+async function patchBot(body) {
+  try {
+    const r = await fetch(API, {
+      method: "PATCH", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    if (data.error) return false;
+    return true;
+  } catch (e) { return false; }
+}
+
+/* ---------- Jobs ---------- */
+function watch(jobId, statusEl, buttons) {
+  clearInterval(poll);
+  $("jobCard").classList.remove("hidden");
+  poll = setInterval(async () => {
+    try {
+      const r = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`);
+      const j = await r.json();
+      $("jobLog").textContent = (j.log || []).join("\n");
+      $("jobLog").scrollTop = $("jobLog").scrollHeight;
+      $("jobStage").textContent = j.stage ? `· ${j.stage}` : "";
+      const pct = j.total ? Math.round((j.processed / j.total) * 100) : (j.status === "running" ? 5 : 100);
+      $("jobBar").style.width = pct + "%";
+      $("jobCounts").textContent =
+        `${j.processed ?? 0}/${j.total ?? 0} · ${j.saved ?? 0} saved · ${j.indexed ?? 0} chunks`;
+      if (j.status && j.status !== "running") {
+        clearInterval(poll);
+        (buttons || []).forEach((b) => { if (b) b.disabled = false; });
+        if (statusEl) statusEl.textContent = j.status === "error" ? ("Error: " + (j.error || "failed")) : "Done.";
+        loadBot();
+      }
+    } catch (e) { /* keep polling */ }
+  }, 1200);
+}
+
+function notify(message, kind) {
+  const host = $("toasts");
+  if (!host) return;
+  const tone = kind === "error" ? "cm-toast cm-toast-error" : "cm-toast";
+  const el = document.createElement("div");
+  el.className = `pointer-events-auto rounded-lg border ${tone} px-4 py-3 text-sm cm-text shadow-lg max-w-xs`;
+  el.textContent = message;            // textContent = XSS-safe, no escaping needed
+  host.appendChild(el);
+  setTimeout(() => el.remove(), 6000);
+}
+
+/* ---------- Ingestion queue ---------- */
+let queuePoll = null;
+let prevJobStatus = {};
+let queueSeeded = false;
+let activeSourceIds = new Set();
+
+function jobBadge(status) {
+  const cls = {queued:"badge-pending", running:"badge-building", done:"badge-ready", error:"badge-error"}[status] || "badge-neutral";
+  return `<span class="badge ${cls}">${escapeHtml(status || "—")}</span>`;
+}
+
+function renderQueue(jobs) {
+  const panel = $("queuePanel");
+  if (!jobs.length) { panel.classList.add("hidden"); $("queueList").innerHTML = ""; return; }
+  panel.classList.remove("hidden");
+  $("queueList").innerHTML = jobs.map((j) => {
+    const total = j.videos_total || 0, done = j.videos_done || 0, failed = j.videos_failed || 0;
+    const pct = total ? Math.min(100, Math.round((done / total) * 100))
+                      : (j.status === "running" ? 5 : (j.status === "done" ? 100 : 0));
+    const counts = total ? `${done}/${total}` : (j.status === "queued" ? "queued" : `${done}`);
+    const failTxt = failed ? ` · <span class="cm-rose">${failed} failed</span>` : "";
+    const errTxt = (j.status === "error" && j.error)
+      ? `<div class="text-xs cm-rose mt-1">${escapeHtml(j.error)}</div>` : "";
+    const cancellable = j.status === "queued" || j.status === "running";
+    const cancelBtn = cancellable
+      ? `<button data-cancel="${escapeHtml(j.job_id)}" class="cancelJob btn-danger text-xs px-2 py-1">Cancel</button>`
+      : "";
+    const C = 2 * Math.PI * 20;
+    const dashOffset = (C * (1 - pct / 100)).toFixed(2);
+    const ring = `
+      <div class="relative shrink-0" style="width:48px;height:48px;">
+        <svg width="48" height="48" viewBox="0 0 48 48" style="transform:rotate(-90deg);">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#22222c" stroke-width="4"></circle>
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#f43f5e" stroke-width="4" stroke-linecap="round"
+                  stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${dashOffset}"></circle>
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center text-[10px] font-semibold cm-muted">${pct}%</div>
+      </div>`;
+    return `
+      <div class="rounded-lg cm-row px-4 py-3">
+        <div class="flex items-center gap-3">
+          ${ring}
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-sm font-medium truncate">${escapeHtml(j.channel_url || "channel")}</div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs cm-faint">${counts}${failTxt}</span>
+                ${jobBadge(j.status)}
+                ${cancelBtn}
+              </div>
+            </div>
+            ${errTxt}
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+  document.querySelectorAll(".cancelJob").forEach((b) =>
+    b.addEventListener("click", () => cancelJob(b.dataset.cancel, b))
+  );
+}
+
+async function cancelJob(id, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    await fetch(`/api/ingest/jobs/${encodeURIComponent(id)}/cancel`, {method: "POST"});
+  } catch (e) { /* fall through to refresh */ }
+  refreshQueue();
+}
+
+async function refreshQueue() {
+  try {
+    const r = await fetch("/api/ingest/jobs");
+    const data = await r.json();
+    const jobs = data.jobs || [];
+    renderQueue(jobs);
+    if (queueSeeded) {
+      for (const j of jobs) {
+        const prev = prevJobStatus[j.job_id];
+        if (prev && prev !== j.status) {
+          if (j.status === "done") notify(`Finished ingesting ${j.channel_url || "channel"}`, "success");
+          else if (j.status === "error") notify(`Failed ingesting ${j.channel_url || "channel"}: ${j.error || "error"}`, "error");
+        }
+      }
+    }
+    prevJobStatus = {};
+    for (const j of jobs) prevJobStatus[j.job_id] = j.status;
+    queueSeeded = true;
+    const nextActiveSources = new Set();
+    for (const j of jobs) {
+      if (j.status === "queued" || j.status === "running") nextActiveSources.add(j.source_id);
+    }
+    const sourcesChanged =
+      nextActiveSources.size !== activeSourceIds.size ||
+      [...nextActiveSources].some((id) => !activeSourceIds.has(id));
+    activeSourceIds = nextActiveSources;
+    if (sourcesChanged) loadBot();  // re-render cards so Start-import buttons match
+    const active = jobs.some((j) => j.status === "queued" || j.status === "running");
+    if (active) startQueuePolling(); else stopQueuePolling();
+    return active;
+  } catch (e) { return false; }
+}
+
+function startQueuePolling() {
+  if (queuePoll) return;                 // single interval only
+  queuePoll = setInterval(refreshQueue, 2500);
+}
+
+function stopQueuePolling() {
+  if (queuePoll) { clearInterval(queuePoll); queuePoll = null; loadBot(); }  // refresh source counts once when the queue drains
+}
+
+/* ---------- Add YouTube ---------- */
+// The Add button stays disabled until the rights attestation is ticked; the
+// server enforces the same flag, so this is just an early, friendly gate.
+function syncYtConsent() {
+  $("addYt").disabled = !$("yt_consent").checked;
+}
+
+async function addYt() {
+  const channel = $("yt_channel").value.trim();
+  const author = $("yt_author").value.trim();
+  if (!channel) { $("ytStatus").textContent = "Enter a channel."; return; }
+  if (!author) { $("ytStatus").textContent = "Enter an author."; return; }
+  if (!$("yt_consent").checked) {
+    $("ytStatus").textContent = "Confirm you have the rights to this content first.";
+    return;
+  }
+  $("addYt").disabled = true; $("ytStatus").textContent = "Adding…";
+  try {
+    const r = await fetch(`${API}/sources/youtube`, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({channel, author, consent: true}),
+    });
+    const data = await r.json();
+    if (data.error) { $("ytStatus").textContent = data.error; syncYtConsent(); return; }
+    $("ytStatus").textContent = "Added.";
+    $("yt_channel").value = "";
+    $("yt_consent").checked = false;
+    syncYtConsent();
+    loadBot();
+  } catch (e) { $("ytStatus").textContent = "Request failed: " + e; syncYtConsent(); }
+}
+
+async function startImport(sourceId, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/sources/${encodeURIComponent(sourceId)}/import`, {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: "{}",
+    });
+    const data = await r.json();
+    if (data.error) { notify(data.error, "error"); if (btn) btn.disabled = false; return; }
+    notify("Import started.", "success");
+    refreshQueue();
+    loadBot();
+  } catch (e) { notify("Request failed: " + e, "error"); if (btn) btn.disabled = false; }
+}
+
+/* ---------- Add document ---------- */
+// Mirror of the YouTube gate — the document Add button waits on its own
+// attestation checkbox, and the server enforces the same flag.
+function syncDocConsent() {
+  $("addDoc").disabled = !$("doc_consent").checked;
+}
+
+async function addDoc() {
+  const f = $("doc_file").files[0];
+  const author = $("doc_author").value.trim();
+  if (!f) { $("docStatus").textContent = "Choose a file."; return; }
+  if (!author) { $("docStatus").textContent = "Enter an author."; return; }
+  if (!$("doc_consent").checked) {
+    $("docStatus").textContent = "Confirm you have the rights to this content first.";
+    return;
+  }
+  const fd = new FormData();
+  fd.append("file", f);
+  fd.append("author", author);
+  fd.append("consent", "true");
+  $("addDoc").disabled = true; $("docStatus").textContent = "Uploading…";
+  try {
+    const r = await fetch(`${API}/sources/document`, {method: "POST", body: fd});
+    const data = await r.json();
+    if (data.error) { $("docStatus").textContent = data.error; syncDocConsent(); return; }
+    $("docStatus").textContent = "Indexing…";
+    $("doc_consent").checked = false;
+    watch(data.job_id, $("docStatus"), [$("addYt"), $("addDoc"), $("rebuild")]);
+  } catch (e) { $("docStatus").textContent = "Request failed: " + e; syncDocConsent(); }
+}
+
+async function delSource(id) {
+  if (!confirm("Delete this source and rebuild the index?")) return;
+  try {
+    const r = await fetch(`${API}/sources/${encodeURIComponent(id)}`, {method: "DELETE"});
+    const data = await r.json().catch(() => ({}));
+    if (data && data.job_id) watch(data.job_id, null, [$("addYt"), $("addDoc"), $("rebuild")]);
+    else loadBot();
+  } catch (e) { alert("Delete failed: " + e); }
+}
+
+async function rebuild() {
+  $("rebuild").disabled = true;
+  try {
+    const r = await fetch(`${API}/rebuild`, {method: "POST"});
+    const data = await r.json();
+    if (data.error) { $("rebuild").disabled = false; return; }
+    watch(data.job_id, null, [$("addYt"), $("addDoc"), $("rebuild")]);
+  } catch (e) { $("rebuild").disabled = false; }
+}
+
+/* ---------- Chat ---------- */
+function addMsg(role, text, sources, asMarkdown) {
+  const empty = $("chatEmpty");
+  if (empty) empty.remove();
+  const wrap = document.createElement("div");
+  wrap.className = "card " + (role === "user" ? "bubble-user" : "bubble-ai");
+  const who = document.createElement("div");
+  who.className = "text-xs uppercase tracking-wide cm-faint mb-1";
+  who.textContent = role === "user" ? "You" : "Assistant";
+  const body = document.createElement("div");
+  if (asMarkdown) { body.className = "markdown text-sm"; body.innerHTML = renderMarkdown(text); }
+  else { body.className = "whitespace-pre-wrap text-sm"; body.textContent = text; }
+  wrap.appendChild(who); wrap.appendChild(body);
+  if (sources && sources.length) {
+    const src = document.createElement("div");
+    src.className = "mt-2 text-xs cm-faint";
+    src.innerHTML = "Sources: " + sources.map((s) => {
+      const u = safeUrl(s.url);
+      return u
+        ? `<a class="cm-link" href="${escapeHtml(u)}" target="_blank" rel="noopener">${escapeHtml(s.title)}</a>`
+        : escapeHtml(s.title);
+    }).join(" · ");
+    wrap.appendChild(src);
+  }
+  $("messages").appendChild(wrap);
+  $("messages").scrollTop = $("messages").scrollHeight;
+  return wrap;
+}
+
+async function chatSend() {
+  const msg = $("chatInput").value.trim();
+  if (!msg) return;
+  $("chatInput").value = "";
+  addMsg("user", msg);
+  $("chatSend").disabled = true;
+  const placeholder = addMsg("assistant", "…thinking…");
+  try {
+    const r = await fetch(`${API}/chat`, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message: msg, history, top_k: 12}),
+    });
+    const data = await r.json();
+    placeholder.remove();
+    if (data.error) { addMsg("assistant", "Error: " + data.error); }
+    else {
+      addMsg("assistant", data.answer || "", data.sources, true);
+      history.push({role: "user", content: msg});
+      history.push({role: "assistant", content: data.answer || ""});
+    }
+  } catch (e) { placeholder.remove(); addMsg("assistant", "Request failed: " + e); }
+  $("chatSend").disabled = false;
+}
+
+/* ---------- Telegram ---------- */
+async function tgConnect() {
+  const token = $("tgToken").value.trim();
+  if (!token) { $("tgStatus").textContent = "Paste your token."; return; }
+  $("tgConnect").disabled = true; $("tgStatus").textContent = "Connecting…";
+  try {
+    const r = await fetch(`${API}/telegram`, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({token}),
+    });
+    const data = await r.json();
+    if (!data.ok) { $("tgStatus").textContent = data.error || "Failed to connect."; }
+    else { $("tgToken").value = ""; $("tgStatus").textContent = ""; renderTelegram(data.username); }
+  } catch (e) { $("tgStatus").textContent = "Request failed: " + e; }
+  $("tgConnect").disabled = false;
+}
+
+async function tgDisconnect() {
+  if (!confirm("Disconnect this bot from Telegram?")) return;
+  $("tgDisconnect").disabled = true;
+  try {
+    const r = await fetch(`${API}/telegram`, {method: "DELETE"});
+    const data = await r.json().catch(() => ({}));
+    if (data && data.error) { alert(data.error); }
+    else renderTelegram(null);
+  } catch (e) { alert("Disconnect failed: " + e); }
+  $("tgDisconnect").disabled = false;
+}
+
+/* ---------- Share (private link) ---------- */
+function renderShare(info) {
+  const off = $("shareOff"), on = $("shareOn");
+  if (info && info.active) {
+    off.classList.add("hidden");
+    on.classList.remove("hidden");
+    $("shareUrl").value = info.url || "";
+    $("shareCount").textContent = `${info.today_count ?? 0} / ${info.daily_cap ?? "—"}`;
+  } else {
+    on.classList.add("hidden");
+    off.classList.remove("hidden");
+  }
+}
+
+async function openShare() {
+  $("shareStatus").textContent = "";
+  $("shareModal").hidden = false;
+  $("shareModal").style.display = "flex";
+  try {
+    const r = await fetch(`${API}/share`);
+    const info = await r.json();
+    renderShare(info);
+  } catch (e) { $("shareStatus").textContent = "Failed to load share status."; }
+}
+
+function closeShare() { $("shareModal").hidden = true; $("shareModal").style.display = "none"; }
+
+async function shareAction(method, path) {
+  $("shareStatus").textContent = "Working…";
+  try {
+    const r = await fetch(`${API}/share${path || ""}`, { method });
+    const info = await r.json();
+    if (info.error) { $("shareStatus").textContent = info.error; return; }
+    renderShare(info);
+    $("shareStatus").textContent = "";
+  } catch (e) { $("shareStatus").textContent = "Request failed: " + e; }
+}
+
+async function copyShare() {
+  const url = $("shareUrl").value;
+  try {
+    await navigator.clipboard.writeText(url);
+    $("shareStatus").textContent = "Link copied.";
+  } catch (e) {
+    $("shareUrl").select();
+    $("shareStatus").textContent = "Press Ctrl+C to copy.";
+  }
+}
+
+async function revokeShare() {
+  if (!confirm("Revoke this link? Anyone using it will lose access immediately.")) return;
+  await shareAction("DELETE");
+}
+
+async function rotateShare() {
+  if (!confirm("Rotate to a new link? The current link stops working right away.")) return;
+  await shareAction("POST", "/rotate");
+}
+
+/* ---------- Wire up ---------- */
+$("shareBtn").addEventListener("click", openShare);
+$("shareClose").addEventListener("click", closeShare);
+$("shareModal").addEventListener("click", (e) => { if (e.target === $("shareModal")) closeShare(); });
+$("shareGenerate").addEventListener("click", () => shareAction("POST"));
+$("shareCopy").addEventListener("click", copyShare);
+$("shareRotate").addEventListener("click", rotateShare);
+$("shareRevoke").addEventListener("click", revokeShare);
+$("saveName").addEventListener("click", saveName);
+$("buildPersona").addEventListener("click", startInterview);
+$("interviewSend").addEventListener("click", sendInterviewAnswer);
+$("interviewA").addEventListener("keydown", (e) => { if (e.key === "Enter") sendInterviewAnswer(); });
+$("savePersona").addEventListener("click", savePersona);
+$("addYt").addEventListener("click", addYt);
+$("yt_consent").addEventListener("change", syncYtConsent);
+$("addDoc").addEventListener("click", addDoc);
+$("doc_consent").addEventListener("change", syncDocConsent);
+$("rebuild").addEventListener("click", rebuild);
+$("chatSend").addEventListener("click", chatSend);
+$("chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") chatSend(); });
+$("tgConnect").addEventListener("click", tgConnect);
+$("tgDisconnect").addEventListener("click", tgDisconnect);
+loadBot();
+refreshQueue();
+</script>
+{% endblock %}

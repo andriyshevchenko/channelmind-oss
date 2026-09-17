@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+settings.json
+
+# Data / artifacts
+data/
+chroma/
+backups/
+*.tar.gz
+_e2e*
+*.log
+*.vtt
+*.srt
+*.json.gz
+
+# Local smoke-test transcripts (may hold screenshot/conversation content)
+smoke_thinking_*.txt
+smoke_thinking_*.md
+
+# E2E / local sandboxes (data_e2e/, chroma_e2e/, settings_e2e.json)
+*_e2e/
+*_e2e.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

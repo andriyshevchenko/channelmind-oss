@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Channelmind — Grounded chat over your YouTube channel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #0a0a0e; font-family: 'Instrument Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: #e5e5ea; }
+  a { color: #a5b4fc; text-decoration: none; }
+  a:hover { color: #c7d2fe; }
+  .cm-signin { height: 36px; box-sizing: border-box; display: flex; align-items: center; padding: 0 14px; border-radius: 8px; border: 1px solid #2c2c3a; font-size: 13px; font-weight: 600; color: #e5e5ea; }
+  .cm-signin:hover { background: #16161f; color: #e5e5ea; }
+  .cm-cta { margin-top: 10px; height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 0 22px; border-radius: 8px; background: #fff; color: #1a1a24; font-size: 14px; font-weight: 600; }
+  .cm-cta:hover { background: #ececf2; color: #1a1a24; }
+  .cm-foot-link { color: #8a8a99; }
+  .cm-foot-link:hover { color: #e5e5ea; }
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: radial-gradient(900px 500px at 50% -10%, rgba(99,102,241,.12), transparent), #0a0a0e; color: #e5e5ea; display: flex; flex-direction: column;">
+  <header style="max-width: 1080px; width: 100%; margin: 0 auto; box-sizing: border-box; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #f43f5e, #6366f1); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(99,102,241,.35);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><rect x="4" y="6" width="16" height="12" rx="3"></rect><circle cx="9" cy="12" r="1" fill="#fff" stroke="none"></circle><circle cx="15" cy="12" r="1" fill="#fff" stroke="none"></circle></svg>
+      </div>
+      <span style="font-size: 15px; font-weight: 700; letter-spacing: -.01em;">Channelmind</span>
+    </div>
+    <a href="/login" class="cm-signin">Sign in</a>
+  </header>
+  <main style="max-width: 1080px; width: 100%; margin: 0 auto; box-sizing: border-box; padding: 72px 32px 96px; flex: 1;">
+    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px;">
+      <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #f43f5e, #6366f1); display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 40px rgba(99,102,241,.4);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><rect x="4" y="6" width="16" height="12" rx="3"></rect><circle cx="9" cy="12" r="1" fill="#fff" stroke="none"></circle><circle cx="15" cy="12" r="1" fill="#fff" stroke="none"></circle></svg>
+      </div>
+      <h1 style="margin: 0; font-size: 44px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; max-width: 640px;">Channelmind</h1>
+      <p style="margin: 0; font-size: 18px; color: #8a8a99; max-width: 520px; line-height: 1.5;">Grounded chat over your YouTube channel's transcripts.</p>
+      <a href="/auth/google" class="cm-cta">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"></path><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"></path><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A11 11 0 0 0 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"></path></svg>
+        Sign in with Google
+      </a>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 80px;">
+      <div style="border-radius: 12px; border: 1px solid #1e1e28; background: #12121a; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 18px; color: #f87171;">&#9654;</span>
+        <span style="font-size: 15px; font-weight: 700;">Ingest a channel</span>
+        <span style="font-size: 13px; color: #8a8a99; line-height: 1.55;">Point Channelmind at your channel or documents — transcripts become a private, searchable index.</span>
+      </div>
+      <div style="border-radius: 12px; border: 1px solid #1e1e28; background: #12121a; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 18px; color: #a5b4fc;">&#10022;</span>
+        <span style="font-size: 15px; font-weight: 700;">Give it a persona</span>
+        <span style="font-size: 13px; color: #8a8a99; line-height: 1.55;">A short interview turns your voice and style into a system prompt — no prompt engineering needed.</span>
+      </div>
+      <div style="border-radius: 12px; border: 1px solid #1e1e28; background: #12121a; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 18px; color: #34d399;">&#8599;</span>
+        <span style="font-size: 15px; font-weight: 700;">Share it privately</span>
+        <span style="font-size: 13px; color: #8a8a99; line-height: 1.55;">A private share link for a few people you trust, or your own Telegram bot — they chat, answers stay grounded in your content.</span>
+      </div>
+    </div>
+  </main>
+  <footer style="border-top: 1px solid #1e1e28;">
+    <div style="max-width: 1080px; margin: 0 auto; box-sizing: border-box; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #5a5a6a;">
+      <span>&copy; 2026 Channelmind</span>
+      <div style="display: flex; gap: 18px;">
+        <a href="/terms" class="cm-foot-link">Terms</a>
+        <a href="/privacy" class="cm-foot-link">Privacy</a>
+      </div>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

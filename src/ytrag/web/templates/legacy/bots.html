@@ -1,0 +1,379 @@
+{% extends "legacy/base.html" %}
+{% block title %}My Bots · Channelmind{% endblock %}
+{% block header_label %}<span class="cm-header-sep">/</span><span class="cm-header-label">My Bots</span>{% endblock %}
+{% block content %}
+<div style="display:flex; flex-direction:column; gap:5px; margin-bottom:24px;">
+  <span class="eyebrow">Workspace</span>
+  <h1 style="margin:0; font-size:24px; font-weight:700; letter-spacing:-.01em; color:var(--text-strong);">My Bots</h1>
+  <span style="font-size:13.5px; color:var(--muted);">Each bot blends your YouTube channels and documents into a private index — with its own persona and Telegram handle.</span>
+</div>
+
+<!-- Create a bot -->
+<div class="card" style="padding:20px; margin-bottom:16px; display:flex; flex-direction:column; gap:14px;">
+  <span style="font-size:13px; font-weight:700; color:var(--text-strong);">Create a bot</span>
+  <div style="display:grid; grid-template-columns:1.2fr .8fr; gap:12px;">
+    <label style="display:flex; flex-direction:column; gap:6px;">
+      <span class="label" style="margin:0;">Name <span style="color:var(--accent-from);">*</span></span>
+      <input id="name" class="field" placeholder="e.g. Cooking Channel Assistant" />
+    </label>
+    <label style="display:flex; flex-direction:column; gap:6px;">
+      <span class="label" style="margin:0;">Language <span style="color:var(--faint); font-weight:400;">(bot replies &amp; status)</span></span>
+      <input id="language" class="field" placeholder="Ukrainian" />
+    </label>
+  </div>
+  <label style="display:flex; flex-direction:column; gap:6px;">
+    <span class="label" style="margin:0;">Description</span>
+    <textarea id="description" class="field" rows="2" placeholder="What should this bot know and how should it speak?"></textarea>
+  </label>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <button id="create" class="btn">Create bot</button>
+    <span id="createStatus" style="font-size:12.5px; color:var(--muted);"></span>
+  </div>
+</div>
+
+<!-- Usage + plan -->
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(380px, 1fr)); gap:16px; margin-bottom:28px;">
+  <!-- LLM usage -->
+  <div class="card" style="padding:18px 20px; display:flex; flex-direction:column; gap:14px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <span style="font-size:13px; font-weight:700; color:var(--text-strong);">LLM usage</span>
+      <button id="usageToggle" class="hidden" style="border:none; background:none; cursor:pointer; font-family:inherit; font-size:12px; font-weight:500; color:var(--accent-soft); padding:0;">Show by model</button>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div class="tile" style="display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:11px; color:var(--faint);">Spend</span>
+        <span id="usageSpend" class="mono" style="font-size:17px; font-weight:500; color:var(--text);">—</span>
+      </div>
+      <div class="tile" style="display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:11px; color:var(--faint);">Tokens</span>
+        <span id="usageTokens" class="mono" style="font-size:17px; font-weight:500; color:var(--text);">—</span>
+      </div>
+    </div>
+    <div id="usageByModel" class="hidden" style="display:flex; flex-direction:column; gap:7px; border-top:1px solid var(--card-border); padding-top:12px;"></div>
+    <span style="font-size:11px; color:var(--faint);">Spend reflects chat LLM calls only — ingestion &amp; embeddings not counted.</span>
+  </div>
+  <!-- Your plan -->
+  <div class="card" style="padding:18px 20px; display:flex; flex-direction:column; gap:14px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:13px; font-weight:700; color:var(--text-strong);">Your plan</span>
+      <span id="planBadge"><span class="badge badge-neutral">—</span></span>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+      <div class="tile" style="display:flex; flex-direction:column; gap:7px;">
+        <span style="font-size:11px; color:var(--faint);">Bots</span>
+        <span id="planBots" class="mono" style="font-size:15px; font-weight:500;">—</span>
+        <div class="cm-bar"><span id="planBotsBar" style="width:0%"></span></div>
+      </div>
+      <div class="tile" style="display:flex; flex-direction:column; gap:7px;">
+        <span style="font-size:11px; color:var(--faint);">Sources</span>
+        <span id="planSources" class="mono" style="font-size:15px; font-weight:500;">—</span>
+        <div class="cm-bar"><span id="planSourcesBar" style="width:0%"></span></div>
+      </div>
+      <div class="tile" style="display:flex; flex-direction:column; gap:7px;">
+        <span style="font-size:11px; color:var(--faint);">Active imports</span>
+        <span id="planJobs" class="mono" style="font-size:15px; font-weight:500;">—</span>
+        <div class="cm-bar"><span id="planJobsBar" style="width:0%"></span></div>
+      </div>
+    </div>
+    <span id="planVideosCap" style="font-size:11px; color:var(--faint);">Up to — videos per channel.</span>
+  </div>
+</div>
+
+<!-- Bot list -->
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+  <span style="font-size:13px; font-weight:700; color:var(--text-strong);">Your bots</span>
+  <span id="count" style="font-size:12px; color:var(--muted);"></span>
+</div>
+<div id="grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
+  <p style="font-size:13px; color:var(--faint);">Loading…</p>
+</div>
+
+<!-- Share modal (private link) -->
+<div id="shareModal" hidden style="position:fixed; inset:0; z-index:50; background:rgba(5,5,8,.7); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:24px;">
+  <div class="card" style="width:100%; max-width:440px; box-shadow:0 24px 64px rgba(0,0,0,.6); padding:24px; display:flex; flex-direction:column; gap:14px;" onclick="event.stopPropagation()">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:3px;">
+        <span style="font-size:16px; font-weight:700; color:var(--text-strong);">Share this bot</span>
+        <span style="font-size:12.5px; color:var(--muted);">A private link — no account needed to chat.</span>
+      </div>
+      <button id="shareClose" type="button" class="btn-ghost" style="padding:4px 8px;">✕</button>
+    </div>
+    <div id="shareOff" class="hidden" style="display:flex; flex-direction:column; gap:12px;">
+      <p style="font-size:13px; color:var(--muted); line-height:1.55; margin:0;">
+        Create a private link so a few people you trust can chat with this bot. It runs on
+        <strong>your</strong> quota, so keep the circle small.
+      </p>
+      <button id="shareGenerate" class="btn">Create private link</button>
+    </div>
+    <div id="shareOn" class="hidden" style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; gap:8px;">
+        <input id="shareUrl" class="field mono" readonly style="flex:1; font-size:12px;" />
+        <button id="shareCopy" class="btn-secondary" style="white-space:nowrap;">Copy</button>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:8px; background:var(--tile); border:1px solid var(--tile-border);">
+        <span style="font-size:12px; color:var(--faint);">Guest messages today</span>
+        <span id="shareCount" class="mono" style="font-size:13px; color:var(--text);">— / —</span>
+      </div>
+      <p style="font-size:12px; color:#fbbf24; background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.2); border-radius:8px; padding:9px 11px; margin:0; line-height:1.5;">
+        Anyone with this link can chat with this bot on your quota — share only with people you trust.
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button id="shareRotate" class="btn-secondary" style="flex:1;">Rotate link</button>
+        <button id="shareRevoke" class="btn-danger" style="flex:1;">Revoke</button>
+      </div>
+    </div>
+    <span id="shareStatus" style="font-size:12px; color:var(--muted); min-height:14px;"></span>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, (c) => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]
+  ));
+}
+
+function badge(status) {
+  const s = (status || "").toLowerCase();
+  const cls = {pending:"badge-pending", building:"badge-building", ready:"badge-ready", error:"badge-error"}[s] || "badge-neutral";
+  return `<span class="badge ${cls}">${escapeHtml(status || "—")}</span>`;
+}
+
+async function loadBots() {
+  try {
+    const r = await fetch("/api/bots");
+    const data = await r.json();
+    const bots = data.bots || [];
+    $("count").textContent = bots.length ? `${bots.length} bot${bots.length === 1 ? "" : "s"}` : "";
+    if (!bots.length) {
+      $("grid").innerHTML = `
+        <div style="grid-column:1 / -1; display:flex; flex-direction:column; align-items:center; gap:14px; padding:72px 32px; border-radius:12px; border:1px dashed #26262f; background:#0d0d13; text-align:center;">
+          <div style="width:52px; height:52px; border-radius:12px; background:linear-gradient(135deg, rgba(244,63,94,.18), rgba(99,102,241,.18)); border:1px solid #26262f; display:flex; align-items:center; justify-content:center;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><rect x="4" y="6" width="16" height="12" rx="3"></rect><circle cx="9" cy="12" r="1" fill="#a5b4fc" stroke="none"></circle><circle cx="15" cy="12" r="1" fill="#a5b4fc" stroke="none"></circle></svg>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:17px; font-weight:600; color:var(--text-strong);">No bots yet</span>
+            <span style="font-size:13.5px; color:var(--muted); max-width:380px; line-height:1.55;">Create your first bot above — train it on your YouTube channels and documents, give it a persona, wire it to Telegram.</span>
+          </div>
+        </div>`;
+      return;
+    }
+    $("grid").innerHTML = bots.map((b) => {
+      const desc = b.description ? escapeHtml(b.description) : '<span style="font-style:italic; color:var(--faint);">No description</span>';
+      const tgConnected = !!b.telegram_username;
+      const tg = tgConnected
+        ? `<div style="margin-left:auto; display:flex; align-items:center; gap:5px; font-size:12px; color:#34d399;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6c.2-1-.7-1.8-1.6-1.4L2.7 10.1c-1 .4-1 1.9.1 2.2l4.5 1.4 1.7 5.3c.3 1 1.6 1.2 2.2.4l2.4-2.9 4.6 3.4c.9.6 2.1.1 2.3-1l3.4-14.3z" transform="scale(.9) translate(1.2,1.2)"></path></svg>@${escapeHtml(b.telegram_username)}</div>`
+        : `<div style="margin-left:auto; display:flex; align-items:center; gap:5px; font-size:12px; color:var(--faint);"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6c.2-1-.7-1.8-1.6-1.4L2.7 10.1c-1 .4-1 1.9.1 2.2l4.5 1.4 1.7 5.3c.3 1 1.6 1.2 2.2.4l2.4-2.9 4.6 3.4c.9.6 2.1.1 2.3-1l3.4-14.3z" transform="scale(.9) translate(1.2,1.2)"></path></svg>not connected</div>`;
+      return `
+        <div style="display:flex; flex-direction:column; gap:14px; padding:20px; border-radius:12px; border:1px solid var(--card-border); background:linear-gradient(180deg, #12121a, #0e0e14); box-shadow:0 1px 2px rgba(0,0,0,.4);">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+            <div style="display:flex; flex-direction:column; gap:5px; min-width:0;">
+              <span style="font-size:16px; font-weight:600; letter-spacing:-.01em; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(b.name)}</span>
+              <span style="font-size:13px; line-height:1.5; color:var(--muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${desc}</span>
+            </div>
+            ${b.status ? badge(b.status) : ""}
+          </div>
+          <div style="display:flex; align-items:center; gap:20px; padding:12px 14px; border-radius:8px; background:var(--tile); border:1px solid var(--tile-border);">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <span class="mono" style="font-size:15px; font-weight:500; color:var(--text);">${b.source_count ?? 0}</span>
+              <span style="font-size:11px; color:var(--faint);">Sources</span>
+            </div>
+            <span style="width:1px; height:26px; background:var(--card-border);"></span>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <span class="mono" style="font-size:15px; font-weight:500; color:var(--text);">${b.chunk_count ?? 0}</span>
+              <span style="font-size:11px; color:var(--faint);">Indexed chunks</span>
+            </div>
+            ${tg}
+          </div>
+          <div style="display:flex; gap:8px;">
+            <a href="/bots/${encodeURIComponent(b.id)}" class="btn-secondary" style="flex:1; height:36px;">Open</a>
+            <button data-id="${escapeHtml(b.id)}" class="share btn-secondary" style="height:36px;">Share</button>
+            <button data-id="${escapeHtml(b.id)}" data-name="${escapeHtml(b.name)}" class="del btn-danger" style="height:36px;">Delete</button>
+          </div>
+        </div>`;
+    }).join("");
+    document.querySelectorAll(".del").forEach((btn) =>
+      btn.addEventListener("click", () => delBot(btn.dataset.id, btn.dataset.name))
+    );
+    document.querySelectorAll(".share").forEach((btn) =>
+      btn.addEventListener("click", () => openShare(btn.dataset.id))
+    );
+  } catch (e) {
+    $("grid").innerHTML = `<p style="font-size:13px; color:#f87171;">Failed to load bots: ${escapeHtml(String(e))}</p>`;
+  }
+}
+
+async function createBot() {
+  const name = $("name").value.trim();
+  const description = $("description").value.trim();
+  const language = $("language").value.trim();
+  if (!name) { $("createStatus").textContent = "Enter a name."; return; }
+  $("create").disabled = true;
+  $("createStatus").textContent = "Creating…";
+  try {
+    const r = await fetch("/api/bots", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name, description, language}),
+    });
+    const data = await r.json();
+    if (data.error) { $("createStatus").textContent = data.error; $("create").disabled = false; return; }
+    $("name").value = ""; $("description").value = ""; $("language").value = "";
+    $("createStatus").textContent = "Created.";
+    const newId = data.bot && data.bot.id;
+    if (newId) { window.location.href = `/bots/${encodeURIComponent(newId)}`; return; }
+    await loadBots();
+  } catch (e) {
+    $("createStatus").textContent = "Request failed: " + e;
+  }
+  $("create").disabled = false;
+}
+
+async function delBot(id, name) {
+  if (!confirm(`Delete "${name}"? This removes its bot, sources and index.`)) return;
+  try {
+    const r = await fetch(`/api/bots/${encodeURIComponent(id)}`, {method: "DELETE"});
+    const data = await r.json().catch(() => ({}));
+    if (data && data.error) { alert(data.error); return; }
+    await loadBots();
+  } catch (e) {
+    alert("Delete failed: " + e);
+  }
+}
+
+function fmtUsd(n) {
+  const v = Number(n) || 0;
+  return "$" + v.toFixed(4);
+}
+
+function fmtTokens(n) {
+  return (Number(n) || 0).toLocaleString();
+}
+
+async function loadUsage() {
+  try {
+    const r = await fetch("/api/me/usage");
+    const u = await r.json();
+    $("usageSpend").textContent = fmtUsd(u.cost_usd);
+    $("usageTokens").textContent = fmtTokens(u.total_tokens);
+    const models = u.by_model || [];
+    const byModel = $("usageByModel");
+    if (!models.length) {
+      $("usageToggle").classList.add("hidden");
+      byModel.classList.add("hidden");
+      return;
+    }
+    byModel.innerHTML = models.map((m) => `
+      <div class="mono" style="display:flex; align-items:center; gap:10px; font-size:12px;">
+        <span style="color:#b8b8c6; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(m.model)}</span>
+        <span style="color:var(--muted);">${fmtTokens((m.prompt_tokens || 0) + (m.completion_tokens || 0))}</span>
+        <span style="color:var(--faint);">·</span>
+        <span style="color:var(--text);">${fmtUsd(m.cost_usd)}</span>
+        <span style="color:var(--faint);">·</span>
+        <span style="color:var(--muted);">${m.calls || 0}</span>
+      </div>`).join("");
+    $("usageToggle").classList.remove("hidden");
+  } catch (e) {
+    $("usageSpend").textContent = "—";
+    $("usageTokens").textContent = "—";
+  }
+}
+
+function setPlanTile(valId, barId, used, limit) {
+  const u = Number(used) || 0;
+  const lim = Number(limit) || 0;
+  $(valId).textContent = `${u} / ${lim || "—"}`;
+  const pct = lim > 0 ? Math.min(100, Math.max(0, Math.round((u / lim) * 100))) : 0;
+  $(barId).style.width = pct + "%";
+}
+
+async function loadPlan() {
+  try {
+    const r = await fetch("/api/me/plan");
+    const p = await r.json();
+    const L = p.limits || {};
+    const U = p.usage || {};
+    $("planBadge").innerHTML = `<span class="badge badge-ready">${escapeHtml(p.plan || "—")}</span>`;
+    setPlanTile("planBots", "planBotsBar", U.bots_used, L.max_bots);
+    setPlanTile("planSources", "planSourcesBar", U.sources_used, L.max_sources_total);
+    setPlanTile("planJobs", "planJobsBar", U.active_jobs, L.max_active_jobs);
+    const cap = Number(L.max_videos_per_channel) || 0;
+    $("planVideosCap").textContent = `Up to ${cap ? cap.toLocaleString() : "—"} videos per channel.`;
+  } catch (e) {
+    $("planBadge").innerHTML = `<span class="badge badge-neutral">—</span>`;
+    ["planBots", "planSources", "planJobs"].forEach((id) => { $(id).textContent = "—"; });
+  }
+}
+
+$("usageToggle").addEventListener("click", () => {
+  const byModel = $("usageByModel");
+  const hidden = byModel.classList.toggle("hidden");
+  $("usageToggle").textContent = hidden ? "Show by model" : "Hide by model";
+});
+
+/* ---------- Share (private link) ---------- */
+let shareBotId = null;
+
+function renderShare(info) {
+  const off = $("shareOff"), on = $("shareOn");
+  if (info && info.active) {
+    off.classList.add("hidden");
+    on.classList.remove("hidden");
+    $("shareUrl").value = info.url || "";
+    $("shareCount").textContent = `${info.today_count ?? 0} / ${info.daily_cap ?? "—"}`;
+  } else {
+    on.classList.add("hidden");
+    off.classList.remove("hidden");
+  }
+}
+
+async function openShare(botId) {
+  shareBotId = botId;
+  $("shareStatus").textContent = "";
+  $("shareModal").hidden = false;
+  $("shareModal").style.display = "flex";
+  try {
+    const r = await fetch(`/api/bots/${encodeURIComponent(botId)}/share`);
+    renderShare(await r.json());
+  } catch (e) { $("shareStatus").textContent = "Failed to load share status."; }
+}
+
+function closeShare() { $("shareModal").hidden = true; $("shareModal").style.display = "none"; shareBotId = null; }
+
+async function shareAction(method, path) {
+  if (!shareBotId) return;
+  $("shareStatus").textContent = "Working…";
+  try {
+    const r = await fetch(`/api/bots/${encodeURIComponent(shareBotId)}/share${path || ""}`, { method });
+    const info = await r.json();
+    if (info.error) { $("shareStatus").textContent = info.error; return; }
+    renderShare(info);
+    $("shareStatus").textContent = "";
+  } catch (e) { $("shareStatus").textContent = "Request failed: " + e; }
+}
+
+async function copyShare() {
+  try {
+    await navigator.clipboard.writeText($("shareUrl").value);
+    $("shareStatus").textContent = "Link copied.";
+  } catch (e) { $("shareUrl").select(); $("shareStatus").textContent = "Press Ctrl+C to copy."; }
+}
+
+$("shareClose").addEventListener("click", closeShare);
+$("shareModal").addEventListener("click", (e) => { if (e.target === $("shareModal")) closeShare(); });
+$("shareGenerate").addEventListener("click", () => shareAction("POST"));
+$("shareCopy").addEventListener("click", copyShare);
+$("shareRotate").addEventListener("click", () => {
+  if (confirm("Rotate to a new link? The current link stops working right away.")) shareAction("POST", "/rotate");
+});
+$("shareRevoke").addEventListener("click", () => {
+  if (confirm("Revoke this link? Anyone using it will lose access immediately.")) shareAction("DELETE");
+});
+
+$("create").addEventListener("click", createBot);
+loadBots();
+loadUsage();
+loadPlan();
+</script>
+{% endblock %}

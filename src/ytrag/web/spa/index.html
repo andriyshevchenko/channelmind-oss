@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Channelmind</title>
+<!-- MODE: "preview" renders with mock data (no auth, no backend); "production" talks to the real API.
+     In production, serve this file with the meta set to "production" (or have FastAPI template it). -->
+<meta name="cm-mode" content="preview">
+<!-- Fonts are self-hosted (Phase M): @font-face lives in styles.css, woff2 in ./fonts/.
+     No external font CDN — keeps the app dependency-free and CSP-tight. -->
+<link rel="stylesheet" href="./styles.css">
+<script type="importmap">
+{
+  "imports": {
+    "vue": "./vendor/vue.esm-browser.prod.js",
+    "vue-router": "./vendor/vue-router.esm-browser.js",
+    "@vue/devtools-api": "./vendor/devtools-api.stub.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+import { createApp } from 'vue';
+import { router } from './router.js';
+import App from './app.js';
+createApp(App).use(router).mount('#app');
+</script>
+</body>
+</html>

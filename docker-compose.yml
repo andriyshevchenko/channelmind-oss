@@ -1,0 +1,21 @@
+# Minimal local stack: the app in a single container.
+#
+# Create .env first (cp .env.example .env, then set OPENROUTER_API_KEY). .env is
+# gitignored — never commit it. Data and vectors persist in ./data and ./chroma.
+#
+#   docker compose up --build
+#   open http://127.0.0.1:8010
+#
+# For a production deployment (TLS, reverse proxy, backups) bring your own edge —
+# this compose intentionally ships only the app for a simple self-host run.
+
+services:
+  app:
+    build: .
+    env_file: .env
+    ports:
+      - "8010:8000"
+    volumes:
+      - ./data:/data
+      - ./chroma:/chroma
+    restart: unless-stopped

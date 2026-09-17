@@ -1,0 +1,278 @@
+{% extends "legacy/base.html" %}
+{% block title %}Account — Channelmind{% endblock %}
+{% block header_label %}<span class="cm-header-sep">/</span><span class="cm-header-label">Account</span>{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto; padding: 8px 0 40px; display: flex; flex-direction: column; gap: 16px;">
+  <h1 style="margin: 0 0 8px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; color: var(--text);">Account</h1>
+
+  <!-- Identity -->
+  <div class="card" style="padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div style="width: 48px; height: 48px; border-radius: 9999px; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; color: #fff;">{{ (user.name or user.email or "?")[0] | upper }}</div>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-size: 15px; font-weight: 700; color: var(--text);">{{ user.name or user.email }}</span>
+        {% if user.name and user.email %}<span style="font-size: 13px; color: var(--muted);">{{ user.email }}</span>{% endif %}
+      </div>
+    </div>
+    <a href="/logout" class="btn-secondary" style="text-decoration: none;">Log out</a>
+  </div>
+
+  <!-- Plan & usage -->
+  <div class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 14px; font-weight: 700; color: var(--text);">Your plan</span>
+        <span id="planBadge" class="eyebrow" style="padding: 2px 8px; border-radius: 9999px; background: rgba(99,102,241,.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,.3);">—</span>
+      </div>
+      <button type="button" id="upgradeToggle" class="btn" onclick="cmToggleUpgrade()">Upgrade plan</button>
+    </div>
+    <div id="usageGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;"></div>
+
+    <div id="upgradePanel" hidden style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; border-top: 1px solid var(--card-border); padding-top: 18px;">
+      <div class="tile" style="padding: 20px; display: flex; flex-direction: column; gap: 12px; position: relative;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 14px; font-weight: 700; color: var(--text);">Free</span>
+          <span class="mono" style="font-size: 20px; font-weight: 700; color: var(--text);">$0<span style="font-size: 11px; font-weight: 400; color: var(--faint);"> / month</span></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>5 bots</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>20 sources</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>2 active imports</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>500 videos per channel</span>
+        </div>
+        <button type="button" class="btn-secondary" style="margin-top: auto;" disabled>Current plan</button>
+      </div>
+      <div class="tile" style="padding: 20px; display: flex; flex-direction: column; gap: 12px; position: relative; border-color: #6366f1;">
+        <span class="eyebrow" style="position: absolute; top: -9px; left: 16px; padding: 2px 8px; border-radius: 9999px; background: var(--grad); color: #fff; border: none;">Popular</span>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 14px; font-weight: 700; color: var(--text);">Pro</span>
+          <span class="mono" style="font-size: 20px; font-weight: 700; color: var(--text);">$19<span style="font-size: 11px; font-weight: 400; color: var(--faint);"> / month</span></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>25 bots</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>200 sources</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>10 active imports</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>2,000 videos per channel</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>Priority ingestion</span>
+        </div>
+        <button type="button" class="btn" style="margin-top: auto;" onclick="cmToast('Checkout would open here')">Upgrade to Pro</button>
+      </div>
+      <div class="tile" style="padding: 20px; display: flex; flex-direction: column; gap: 12px; position: relative;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 14px; font-weight: 700; color: var(--text);">BYOK</span>
+          <span class="mono" style="font-size: 20px; font-weight: 700; color: var(--text);">$9<span style="font-size: 11px; font-weight: 400; color: var(--faint);"> / month + your keys</span></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>Unlimited LLM usage on your keys</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>25 bots</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>200 sources</span>
+          <span style="font-size: 12.5px; color: #b8b8c6; display: flex; align-items: center; gap: 7px;"><span style="color: #34d399;">&#10003;</span>Provider &amp; model control</span>
+        </div>
+        <button type="button" class="btn-secondary" style="margin-top: auto;" onclick="cmToast('Checkout would open here')">Switch to BYOK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat mode & keys (Managed vs BYOK) -->
+  <div id="chatModeCard" class="card" hidden style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <span style="font-size: 14px; font-weight: 700; color: var(--text);">Chat provider</span>
+      <span style="font-size: 12.5px; color: var(--muted); line-height: 1.5;">Run chats on the built-in <strong>Managed</strong> key (subject to your plan's monthly limit) or bring your own key (<strong>BYOK</strong>) to run on your own provider account with no plan limit. Your key is encrypted at rest and never shown again.</span>
+    </div>
+
+    <div id="modeRow" style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button type="button" id="modeManagedBtn" class="btn-secondary" onclick="cmSetMode('managed')">Managed</button>
+      <button type="button" id="modeByokBtn" class="btn-secondary" onclick="cmSetMode('byok')">Bring your own key</button>
+    </div>
+
+    <div id="byokKeys" hidden style="display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--card-border); padding-top: 16px;">
+      <div id="keystoreWarn" hidden style="font-size: 12px; color: #f8b361;">Key storage isn't configured on this server yet — keys can't be saved.</div>
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <span style="font-size: 12.5px; font-weight: 600; color: #b8b8c6;">Chat provider for your key</span>
+        <select id="byokProvider" class="field" style="max-width: 240px;">
+          <option value="anthropic">anthropic</option>
+          <option value="openai">openai</option>
+          <option value="openrouter">openrouter</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2" style="gap: 14px 24px;">
+        <div>
+          <label class="label" style="font-weight: 600; color: #b8b8c6;">Anthropic API key <span id="k_anthropic"></span></label>
+          <input id="key_anthropic" class="field mono" style="font-size: 12px;" type="password" placeholder="sk-ant-..." />
+        </div>
+        <div>
+          <label class="label" style="font-weight: 600; color: #b8b8c6;">OpenAI API key <span id="k_openai"></span></label>
+          <input id="key_openai" class="field mono" style="font-size: 12px;" type="password" placeholder="sk-..." />
+        </div>
+        <div>
+          <label class="label" style="font-weight: 600; color: #b8b8c6;">OpenRouter API key <span id="k_openrouter"></span></label>
+          <input id="key_openrouter" class="field mono" style="font-size: 12px;" type="password" placeholder="sk-or-..." />
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <button type="button" id="saveChatMode" class="btn" onclick="cmSaveChatMode()">Save</button>
+      <span id="chatModeMsg" style="font-size: 12.5px; color: var(--muted);"></span>
+    </div>
+  </div>
+
+  <!-- Danger zone -->
+  <div style="border-radius: 12px; border: 1px solid rgba(248,113,113,.25); background: rgba(248,113,113,.03); padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <span style="font-size: 14px; font-weight: 700; color: #f87171;">Danger zone</span>
+      <span style="font-size: 12.5px; color: var(--muted); max-width: 480px; line-height: 1.5;">Deleting your account permanently removes all your bots, their sources and indexes, and disconnects any Telegram bots. This cannot be undone.</span>
+    </div>
+    <button type="button" class="btn-danger" onclick="cmAskDelete()">Delete account</button>
+  </div>
+
+  <div style="display: flex; gap: 16px; font-size: 12px; padding-top: 4px;">
+    <a href="/terms" style="color: var(--faint);">Terms of Service</a>
+    <a href="/privacy" style="color: var(--faint);">Privacy Policy</a>
+  </div>
+</div>
+
+<!-- Delete confirm modal -->
+<div id="cmDeleteModal" hidden style="position: fixed; inset: 0; z-index: 50; background: rgba(5,5,8,.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 24px;" onclick="cmCancelDelete()">
+  <div class="card" style="width: 100%; max-width: 400px; box-shadow: 0 24px 64px rgba(0,0,0,.6); padding: 24px; display: flex; flex-direction: column; gap: 10px;" onclick="event.stopPropagation()">
+    <span style="font-size: 16px; font-weight: 700; color: var(--text);">Delete account?</span>
+    <span style="font-size: 13px; color: var(--muted); line-height: 1.55;">All your bots, sources, and indexes will be permanently deleted, and connected Telegram bots will stop responding. This action is irreversible.</span>
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
+      <button type="button" class="btn-secondary" onclick="cmCancelDelete()">Cancel</button>
+      <button type="button" id="cmDeleteConfirmBtn" class="btn-danger" onclick="cmConfirmDelete()">Delete everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="cmToast" hidden style="position: fixed; bottom: 24px; right: 24px; z-index: 60; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 8px; border: 1px solid #2a2a36; background: var(--tile); box-shadow: 0 12px 32px rgba(0,0,0,.5); font-size: 13px; color: var(--text);">
+  <span id="cmToastDot" style="width: 7px; height: 7px; border-radius: 9999px; background: #34d399;"></span>
+  <span id="cmToastMsg"></span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function cmToggleUpgrade(){
+  var p=document.getElementById('upgradePanel');
+  var b=document.getElementById('upgradeToggle');
+  p.hidden=!p.hidden; b.textContent=p.hidden?'Upgrade plan':'Hide plans';
+}
+var _cmToastTimer;
+function cmToast(msg, ok){
+  if(ok===undefined) ok=true;
+  document.getElementById('cmToastMsg').textContent=msg;
+  document.getElementById('cmToastDot').style.background=ok?'#34d399':'#f87171';
+  var t=document.getElementById('cmToast'); t.hidden=false;
+  clearTimeout(_cmToastTimer); _cmToastTimer=setTimeout(function(){t.hidden=true;},3000);
+}
+function cmAskDelete(){document.getElementById('cmDeleteModal').hidden=false;}
+function cmCancelDelete(){document.getElementById('cmDeleteModal').hidden=true;}
+function cmConfirmDelete(){
+  var btn=document.getElementById('cmDeleteConfirmBtn');
+  if(btn){btn.disabled=true;btn.textContent='Deleting…';}
+  function fail(msg){
+    cmCancelDelete();
+    if(btn){btn.disabled=false;btn.textContent='Delete everything';}
+    cmToast(msg||'Could not delete your account. Please try again.', false);
+  }
+  fetch('/api/me',{method:'DELETE',headers:{'Content-Type':'application/json'}})
+    .then(function(r){
+      if(r.ok){window.location.href='/about';return;}
+      return r.json().catch(function(){return {};}).then(function(d){fail(d&&d.error);});
+    })
+    .catch(function(){fail();});
+}
+
+function cmTile(label, count, pct){
+  var bar = pct==null ? '' :
+    '<div class="cm-bar" style="margin-top:1px;"><span style="width:'+pct+';"></span></div>';
+  return '<div class="tile" style="padding:12px 14px; display:flex; flex-direction:column; gap:7px;">'
+    + '<span style="font-size:11px; color:var(--faint);">'+label+'</span>'
+    + '<span class="mono" style="font-size:15px; font-weight:500; color:var(--text);">'+count+'</span>'
+    + bar + '</div>';
+}
+function cmPct(used, total){
+  if(!total || total<=0) return null;
+  var p=Math.min(100, Math.round(used/total*100));
+  return p+'%';
+}
+function cmFmt(n){ return (n==null?0:n).toLocaleString(); }
+
+// ---- Chat mode & BYOK keys ----
+var _chatSettings = null;
+var _chatMode = 'managed';
+var CHAT_PROVIDERS = ['anthropic','openai','openrouter'];
+function cmRenderMode(){
+  var m=document.getElementById('modeManagedBtn'), b=document.getElementById('modeByokBtn');
+  var managed=_chatMode==='managed';
+  m.className=managed?'btn':'btn-secondary';
+  b.className=managed?'btn-secondary':'btn';
+  document.getElementById('byokKeys').hidden=managed;
+}
+function cmSetMode(mode){ _chatMode=mode; cmRenderMode(); }
+function cmHydrateChat(s){
+  _chatSettings=s; _chatMode=s.mode||'managed';
+  // Managed-only plans never see the BYOK button.
+  document.getElementById('modeByokBtn').style.display = s.byok_enabled ? '' : 'none';
+  document.getElementById('keystoreWarn').hidden = !!s.keystore_ready;
+  if(s.llm_provider){ document.getElementById('byokProvider').value=s.llm_provider; }
+  CHAT_PROVIDERS.forEach(function(p){
+    var badge=document.getElementById('k_'+p);
+    var set=s.keys_set && s.keys_set[p];
+    badge.textContent = set ? '✓ saved' : '— not set';
+    badge.style.color = set ? '#34d399' : 'var(--faint)';
+    var input=document.getElementById('key_'+p);
+    input.placeholder = set ? '•••••••• saved (leave blank to keep)' : input.placeholder;
+  });
+  cmRenderMode();
+  document.getElementById('chatModeCard').hidden = false;
+}
+function cmSaveChatMode(){
+  var btn=document.getElementById('saveChatMode'), msg=document.getElementById('chatModeMsg');
+  btn.disabled=true; msg.style.color='var(--muted)'; msg.textContent='Saving…';
+  var body={mode:_chatMode, llm_provider:document.getElementById('byokProvider').value, keys:{}};
+  CHAT_PROVIDERS.forEach(function(p){
+    var v=document.getElementById('key_'+p).value.trim();
+    if(v) body.keys[p]=v;               // only send non-blank keys; blank keeps existing
+  });
+  fetch('/api/me/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+    .then(function(res){
+      if(!res.ok){ msg.style.color='#f87171'; msg.textContent=(res.d&&res.d.error)||'Save failed.'; return; }
+      CHAT_PROVIDERS.forEach(function(p){ document.getElementById('key_'+p).value=''; });
+      cmHydrateChat(res.d.settings);
+      msg.style.color='#34d399'; msg.textContent='Saved.';
+    })
+    .catch(function(){ msg.style.color='#f87171'; msg.textContent='Request failed.'; })
+    .finally(function(){ btn.disabled=false; });
+}
+fetch('/api/me/settings').then(function(r){return r.ok?r.json():null;}).then(function(s){ if(s) cmHydrateChat(s); }).catch(function(){});
+
+(function(){
+  var grid=document.getElementById('usageGrid');
+  Promise.all([
+    fetch('/api/me/plan').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('/api/me/usage').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(res){
+    var plan=res[0], usage=res[1];
+    if(plan && plan.plan){
+      document.getElementById('planBadge').textContent=plan.plan;
+    }
+    var tiles='';
+    if(plan && plan.limits && plan.usage){
+      var L=plan.limits, U=plan.usage;
+      tiles+=cmTile('Bots', U.bots_used+' / '+(L.max_bots!=null?L.max_bots:'∞'), cmPct(U.bots_used, L.max_bots));
+      tiles+=cmTile('Sources', U.sources_used+' / '+(L.max_sources_total!=null?L.max_sources_total:'∞'), cmPct(U.sources_used, L.max_sources_total));
+      tiles+=cmTile('Active imports', U.active_jobs+' / '+(L.max_active_jobs!=null?L.max_active_jobs:'∞'), cmPct(U.active_jobs, L.max_active_jobs));
+    }
+    if(usage){
+      tiles+=cmTile('Spend', '$'+(usage.cost_usd||0).toFixed(4), null);
+      tiles+=cmTile('Tokens', cmFmt(usage.total_tokens), null);
+    }
+    grid.innerHTML = tiles || cmTile('Usage', 'unavailable', null);
+  });
+})();
+</script>
+{% endblock %}

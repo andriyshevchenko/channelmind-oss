@@ -1,0 +1,169 @@
+{% extends "legacy/base.html" %}
+{% block title %}Settings · Channelmind{% endblock %}
+{% block header_label %}<span class="cm-header-sep">/</span><span class="cm-header-label">Settings</span>{% endblock %}
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto;">
+  <h1 style="margin: 0 0 6px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; color: var(--text-strong);">Connection settings</h1>
+  <p style="margin: 0 0 28px; font-size: 13px; color: var(--muted);">
+    Saved to <span class="mono" style="font-size: 12px; color: var(--accent-soft);">settings.json</span> and used at runtime (overrides <span class="mono" style="font-size: 12px; color: var(--accent-soft);">.env</span>). Leave a key blank to keep the existing one.
+  </p>
+
+  <div class="card" style="padding: 28px;">
+    <div class="tile" style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px;">
+      <span style="font-size: 12.5px; color: var(--muted); line-height: 1.5;">Pick a provider for each capability, then supply the API keys for the providers you use. Key fields for unused providers are disabled automatically.</span>
+    </div>
+
+    <!-- Provider + model override rows -->
+    <div class="grid grid-cols-1 md:grid-cols-2" style="gap: 20px 24px;">
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <span style="font-size: 12.5px; font-weight: 600; color: #b8b8c6;">LLM provider (chat)</span>
+        <div style="display: flex; gap: 8px;">
+          <select id="llm_provider" class="field" style="flex: 1;">
+            <option value="anthropic">anthropic</option>
+            <option value="openai">openai</option>
+            <option value="openrouter">openrouter</option>
+          </select>
+          <input id="llm_model" class="field mono" style="flex: 1.2; font-size: 12px;" placeholder="model override (optional)" />
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <span style="font-size: 12.5px; font-weight: 600; color: #b8b8c6;">Embedding provider</span>
+        <div style="display: flex; gap: 8px;">
+          <select id="embed_provider" class="field" style="flex: 1;">
+            <option value="voyage">voyage</option>
+            <option value="openai">openai</option>
+            <option value="openrouter">openrouter</option>
+          </select>
+          <input id="embed_model" class="field mono" style="flex: 1.2; font-size: 12px;" placeholder="model override (optional)" />
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <span style="font-size: 12.5px; font-weight: 600; color: #b8b8c6;">Transcription provider (audio → text)</span>
+        <div style="display: flex; gap: 8px;">
+          <select id="transcription_provider" class="field" style="flex: 1;">
+            <option value="groq">groq</option>
+            <option value="openai">openai</option>
+          </select>
+          <input id="transcription_model" class="field mono" style="flex: 1.2; font-size: 12px;" placeholder="model override (optional)" />
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <span style="font-size: 12.5px; font-weight: 600; color: #b8b8c6;">Vision provider (image understanding)</span>
+        <div style="display: flex; gap: 8px;">
+          <select id="vision_provider" class="field" style="flex: 1;">
+            <option value="openrouter">openrouter</option>
+            <option value="openai">openai</option>
+          </select>
+          <input id="vision_model" class="field mono" style="flex: 1.2; font-size: 12px;" placeholder="model override (optional)" />
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 1px; background: var(--card-border); margin: 26px 0;"></div>
+
+    <!-- API keys -->
+    <div class="grid grid-cols-1 md:grid-cols-2" style="gap: 18px 24px;">
+      <div>
+        <label class="label" style="font-weight: 600; color: #b8b8c6;">Anthropic API key <span id="anthropic_set"></span></label>
+        <input id="anthropic_api_key" class="field mono" style="font-size: 12px;" type="password" placeholder="sk-ant-..." />
+      </div>
+      <div>
+        <label class="label" style="font-weight: 600; color: #b8b8c6;">OpenAI API key <span id="openai_set"></span></label>
+        <input id="openai_api_key" class="field mono" style="font-size: 12px;" type="password" placeholder="sk-..." />
+      </div>
+      <div>
+        <label class="label" style="font-weight: 600; color: #b8b8c6;">OpenRouter API key <span id="openrouter_set"></span></label>
+        <input id="openrouter_api_key" class="field mono" style="font-size: 12px;" type="password" placeholder="sk-or-..." />
+      </div>
+      <div>
+        <label class="label" style="font-weight: 600; color: #b8b8c6;">Voyage API key <span id="voyage_set"></span></label>
+        <input id="voyage_api_key" class="field mono" style="font-size: 12px;" type="password" placeholder="pa-..." />
+      </div>
+      <div>
+        <label class="label" style="font-weight: 600; color: #b8b8c6;">Groq API key <span id="groq_set"></span></label>
+        <input id="groq_api_key" class="field mono" style="font-size: 12px;" type="password" placeholder="gsk_..." />
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 14px; margin-top: 28px;">
+      <button id="save" class="btn">Save settings</button>
+      <span id="msg" class="text-sm text-slate-400"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const S = {{ settings | tojson }};
+const $ = (id) => document.getElementById(id);
+const fields = ["llm_provider","llm_model","embed_provider","embed_model","transcription_provider","transcription_model","vision_provider","vision_model"];
+const secrets = ["anthropic","openai","openrouter","voyage","groq"];
+const PH = {anthropic:"sk-ant-...", openai:"sk-...", openrouter:"sk-or-...", voyage:"pa-...", groq:"gsk_..."};
+
+// A key field is only relevant if its provider is selected for any capability slot.
+function usedProviders() {
+  return new Set([
+    $("llm_provider").value, $("embed_provider").value,
+    $("transcription_provider").value, $("vision_provider").value,
+  ]);
+}
+
+function applyLocks() {
+  const used = usedProviders();
+  secrets.forEach(s => {
+    const input = $(s + "_api_key");
+    const active = used.has(s);
+    input.disabled = !active;
+    input.closest("div").classList.toggle("opacity-40", !active);
+    $(s + "_set").parentElement.parentElement.classList.toggle("pointer-events-none", !active);
+    if (!active) input.value = "";
+  });
+}
+
+function hydrate() {
+  fields.forEach(f => { if (S[f] != null) $(f).value = S[f]; });
+  secrets.forEach(s => {
+    const isSet = !!S[s + "_api_key_set"];
+    const badge = $(s + "_set");
+    badge.textContent = isSet ? "✓ saved" : "— not set";
+    badge.className = isSet ? "text-emerald-400 text-xs" : "text-slate-500 text-xs";
+    const input = $(s + "_api_key");
+    input.placeholder = isSet ? "•••••••• saved (leave blank to keep)" : PH[s];
+  });
+  applyLocks();
+}
+
+async function save() {
+  const body = {};
+  fields.forEach(f => body[f] = $(f).value);
+  const used = usedProviders();
+  // Only submit keys for providers actually in use; never wipe others.
+  secrets.forEach(s => { const v = $(s + "_api_key").value; if (v && used.has(s)) body[s + "_api_key"] = v; });
+  $("save").disabled = true;
+  $("msg").className = "text-sm text-slate-400"; $("msg").textContent = "Saving…";
+  try {
+    const r = await fetch("/api/settings", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+    const data = await r.json();
+    if (data.error) { $("msg").className = "text-sm text-rose-400"; $("msg").textContent = data.error; return; }
+    Object.assign(S, data.settings);
+    secrets.forEach(s => $(s + "_api_key").value = "");
+    hydrate();
+    $("msg").className = "text-sm text-emerald-400";
+    $("msg").textContent = "Saved. Keys marked ✓ saved are stored — the field stays blank on purpose.";
+  } catch (e) {
+    $("msg").className = "text-sm text-rose-400"; $("msg").textContent = "Request failed: " + e;
+  } finally {
+    $("save").disabled = false;
+  }
+}
+
+hydrate();
+$("llm_provider").addEventListener("change", applyLocks);
+$("embed_provider").addEventListener("change", applyLocks);
+$("transcription_provider").addEventListener("change", applyLocks);
+$("vision_provider").addEventListener("change", applyLocks);
+$("save").addEventListener("click", save);
+</script>
+{% endblock %}
